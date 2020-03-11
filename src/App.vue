@@ -95,7 +95,7 @@ import ojisanCompiler from './js/ojisan'
         sharedUrl: location.href,
         tweetUrl: this.twitterUrl+this.output+"&hashtags="+this.hashTag+"&url="+this.sharedUrl,*/
         //以下はlog
-        logMsg: null,
+        logMsg: '',
       }
     },
     methods: {
@@ -119,7 +119,7 @@ import ojisanCompiler from './js/ojisan'
       },
       async compiler(){
         try{
-          const result = ojisanCompiler(this.inputMsg,this.accessToken)
+          const result = await ojisanCompiler(this.inputMsg,this.accessToken)
           this.outputMsg = result
           this.tweetBtn = false
         }catch(e){

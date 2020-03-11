@@ -1,36 +1,54 @@
-import axios from 'axios'
+/**
+* HTTP function that supports CORS requests.
+*
+* @param {Object} req Cloud Function request context.
+* @param {Object} res Cloud Function response context.
+*/
+const axios = require('axios')
+exports.corsEnabledFunction = async (req, res) => {
+ // Set CORS headers for preflight requests
+ // Allows GETs from any origin with the Content-Type header
+ // and caches preflight response for 3600s
 
-export default class Cotoha{
-  constructor(sentence,accessToken){
+ res.set('Access-Control-Allow-Origin', '*');
+
+ if (req.method === 'OPTIONS') {
+   // Send response to OPTIONS requests
+   res.set('Access-Control-Allow-Methods', 'POST');
+   res.set('Access-Control-Allow-Headers', 'Content-Type');
+   res.set('Access-Control-Max-Age', '3600');
+   res.status(204).send('');
+ } else {
+   await ojisanCompiler(req,res)
+ }
+};
+
+class Cotoha{
+  constructor(sentence,cotoha_token){
     this.sentence = sentence;
-    this.accessToken = accessToken
+    this.cotoha_token = cotoha_token
   }
-
   async client(){
-    const cotoha_token = this.accessToken
-
     const axiosConfig = await axios.create({
       headers:{
-        "Authorization": `Bearer ${cotoha_token}`,
+        "Authorization": `Bearer ${this.cotoha_token}`,
         "Content-Type": "application/json"
       },
       baseURL:"https://api.ce-cotoha.com/api/dev/nlp/v1",
     });
-
     return axiosConfig;
   }
-
   async parse(){
     const axiosBase = await this.client();
     axiosBase.post("/parse",{
-       "sentence":this.sentence
-     }).then(async(res)=>{
-       //await fs.writeFile("./output/parse.json",JSON.stringify(res.data,null,"\t"));
-       return res.data;
-     }).catch(err=>{
-       console.log(err);
-       throw err;
-     });
+     "sentence":this.sentence
+   }).then(async(res)=>{
+     //await fs.writeFile("./output/parse.json",JSON.stringify(res.data,null,"\t"));
+     return res.data;
+   }).catch(err=>{
+     console.log(err);
+     throw err;
+   });
   }
   async sentiment(){
     const axiosBase = await this.client();
@@ -69,4 +87,18 @@ export default class Cotoha{
     //await fs.writeFile("./output/sentenceType.json",JSON.stringify(res.data,null,"\t"));
     return res.data;
   }
+}
+
+const ojisanCompiler = async (req,res) => {
+  const obj = req.body
+  if(obj!="jv8rmvf8kd0c3j"){
+    res.status(500).send("Server Error")
+  }
+  const token = obj.access_token
+  const msg = obj.message
+  const cotoha = new Cotoha(msg,token)
+  console.log(cotoha)
+  const result = "おじさんテキスト"
+  const status = 200
+  res.status(status).json({message: result})
 }
