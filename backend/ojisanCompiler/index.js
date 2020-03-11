@@ -99,6 +99,16 @@ const ojisanCompiler = async (req,res) => {
   const cotoha = new Cotoha(msg,token)
   console.log(cotoha)
   const result = "おじさんテキスト"
-  const status = 200
-  res.status(status).json({message: result})
+
+  //const status = 200//test環境ではコメントアウトする
+  //res.status(status).json({message: result})//test環境ではコメントアウトする
+  console.log(result)
 }
+
+const request = {
+  body: {
+    access_token: "WjPODeSphB49P4i08xaA0vAhzOgX",
+    message: "今日もコロナウイルスのせいで自宅待機です。"
+  }
+}
+ojisanCompiler(request)
