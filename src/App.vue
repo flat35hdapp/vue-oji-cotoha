@@ -21,7 +21,8 @@
                 Client IDとClient secretをそれぞれ入力し、「Access tokenを取得」を押してください。
                 <v-text-field v-model="clientId" label="Client ID" :rules="clientIdInput" hide-details="auto"></v-text-field>
                 <v-text-field v-model="clientSecret" label="Client secret" :rules="clientSecretInput" hide-details="auto"></v-text-field>
-                <v-btn @click="getToken()" color="primary" :disabled="accessTokenBtn">Access tokenを取得</v-btn>{{tokenErrMsg}}{{tokenGetMsg}}
+                <v-btn @click="getToken()" color="primary" :disabled="accessTokenBtn">Access tokenを取得</v-btn>
+                <v-progress-circular indeterminate="false" v-if="progressOfgetToken" color="primary"></v-progress-circular>{{tokenErrMsg}}{{tokenGetMsg}}
               </v-card-text>
               <v-card-subtitle>logic</v-card-subtitle>
               <v-card-text>COTOHA APIを利用するにはClient IDとClient secretを用いてAccess Tokenを取得する必要があります。このセクションでは入力されたClient IDとClient secretからAccess Tokenを自動で取得しています。この部分の詳細は公式ページをご覧ください。</v-card-text>
@@ -29,31 +30,40 @@
           </div>
         </v-col>
         <v-col xs="12" sm="12">
-          <v-card>
-            <v-card-title>3, おじさん構文にしたい文章を入力する。</v-card-title>
-            <v-card-text>
-              おじさん構文にしたい普通の文章を入力してください。このとき、「ですます調」や「崩した文章」だと正常に<strong>動作しません。</strong>
-              <v-text-field v-model="inputMsg" label="普通の文"></v-text-field>
-              <v-btn @click="compiler()" color="primary">おじさん構文化</v-btn>
-            </v-card-text>
-          </v-card>
+          <div class="">
+            <v-card>
+              <v-card-title>3, おじさん構文にしたい文章を入力する。</v-card-title>
+              <v-card-text>
+                おじさん構文にしたい普通の文章を入力してください。このとき、「ですます調」で入力してください。「崩した文章」だと正常に動作しません。
+                <v-text-field v-model="inputMsg" label="普通の文"></v-text-field>
+                <v-btn @click="compiler()" color="primary">おじさん構文化</v-btn>
+                <v-progress-circular indeterminate="false" v-if="progressOfgetOji" color="primary"></v-progress-circular>
+              </v-card-text>
+            </v-card>
+          </div>
         </v-col>
         <v-col xs="12" sm="12">
-          <v-card>
-            <v-card-title>4, 出力結果</v-card-title>
-            <v-card-text>
-              <v-text-field v-model="outputMsg" readonly></v-text-field>
-              <v-btn color="primary" :disable="tweetBtn" >Twitterでつぶやく</v-btn>
-            </v-card-text>
-          </v-card>
+          <div class="">
+            <v-card>
+              <v-card-title>4, 出力結果</v-card-title>
+              <v-card-text>
+                <v-text-field v-html="outputMsg" readonly :value="outputMsg"></v-text-field>
+                <!--<v-btn color="primary" :disable="tweetBtn" @click="writeToClipboard()">コピーしてつぶやく</v-btn>-->
+              </v-card-text>
+            </v-card>
+          </div>
+
         </v-col>
         <v-col xs="12" sm="12">
-          <v-card>
-            <v-card-title>Logger</v-card-title>
-            <v-card-text>
-              {{logMsg}}
-            </v-card-text>
-          </v-card>
+          <div class="">
+            <v-card>
+              <v-card-title>Logger</v-card-title>
+              <v-card-text>
+                {{logMsg}}
+              </v-card-text>
+            </v-card>
+          </div>
+
         </v-col>
       </v-row>
     </v-container>
@@ -84,16 +94,15 @@ import ojisanCompiler from './js/ojisan'
         clientId: null,
         clientSecret: null,
         accessToken: null,
+        progressOfgetToken: false,
         //Section 3
         inputMsg: null,
+        progressOfgetOji: false,
         //section 4
         outputMsg: null,
-        tweetBtn: false,
+        //tweetBtn: false,
         //twitter
-        /*twitterUrl: "https://twitter.com/intent/tweet?text=",
-        hashTag: "おじさん構文",
-        sharedUrl: location.href,
-        tweetUrl: this.twitterUrl+this.output+"&hashtags="+this.hashTag+"&url="+this.sharedUrl,*/
+        //tweetUrl: "https://twitter.com",
         //以下はlog
         logMsg: '',
       }
@@ -106,6 +115,7 @@ import ojisanCompiler from './js/ojisan'
           this.tokenErrMsg = "Client Secretを入力してください。"
         }else{
           this.tokenErrMsg = null
+          this.progressOfgetToken = true
           try{
             const result = await auth(this.clientId,this.clientSecret)
             this.accessToken = result
@@ -114,18 +124,31 @@ import ojisanCompiler from './js/ojisan'
             this.logMsg += 'Access Token : '+this.accessToken+'\n'
           }catch(e){
             this.tokenErrMsg = "Access Tokenの取得に失敗しました。入力に誤りがないか、または通信環境に問題ないか確認してください。"
+          }finally{
+            this.progressOfgetToken = false
           }
         }
       },
       async compiler(){
         try{
+          this.progressOfgetOji = true
           const result = await ojisanCompiler(this.inputMsg,this.accessToken)
           this.outputMsg = result
-          this.tweetBtn = false
+          this.tweetBtn = true
+          //this.getTweetUrl()
         }catch(e){
           this.ojiErrMsg = "おじさんになれませんでした。通信環境に問題ないか確認してください。症状が治らない場合はリロードするかブラウザを変更してください。"
+        }finally{
+          this.progressOfgetOji = false
         }
-      }
+      },
+      /*getTweetUrl () {
+        const twitterUrl = "https://twitter.com/intent/tweet?"
+        const hashTag = "おじさん構文"
+        const sharedUrl = location.href
+        this.tweetUrl = twitterUrl+"hashtags="+hashTag+"&url="+sharedUrl
+      },*/
+
     }
   }
 </script>
