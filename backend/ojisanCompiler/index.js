@@ -55,7 +55,7 @@ class Cotoha{
   }
   sentiment(arg){
     return new Promise((resolve,reject)=>{
-      const sentence = arg!=null ? this.sentence : arg
+      const sentence = arg!=null ? arg : this.sentence
       const axiosBase = this.client();
       axiosBase.post("/sentiment",{"sentence":sentence}).then(res=>{
         const result = res.data.result
@@ -66,12 +66,13 @@ class Cotoha{
       })
     })
   }
-  async unique(){
+  async unique(arg){
+    const sentence = arg != null ? arg : this.sentence
     const axiosBase = await this.client();
     try{
-      const res = await axiosBase.post("/ne",{"sentence":this.sentence})
+      const res = await axiosBase.post("/ne",{"sentence":sentence})
       //await fs.writeFile("./output/unique.json",JSON.stringify(res.data,null,"\t"));
-      const result = res.data;
+      const result = res.data.result;
       //console.log(result)
       return result
     }catch(e){
@@ -88,7 +89,7 @@ class Cotoha{
     return res.data;
   }*/
   async sentenceType(arg){
-    const sentence = arg != null ? this.sentence : arg
+    const sentence = arg != null ? arg : this.sentence
     const axiosBase = await this.client();
     const res = await axiosBase.post("/sentence_type",{
       "sentence":sentence,
@@ -153,21 +154,22 @@ class Cotoha{
         id: i,
         sentence : text,
         sentiment : {},
+        unique : [],
         sentenceType : {}
       }
       this.analysisArr.push(obj)
     });
 
-    /*const p1 = this.sentenceArr.map((text,i)=>{
+    const p1 = this.sentenceArr.map((text,i)=>{
       return new Promise((resolve,reject)=>{
-        this.sentiment(text).then(obj=>{
-          this.analysisArr[i].sentiment = obj
+        this.unique(text).then(obj=>{
+          this.analysisArr[i].unique = obj
           resolve(1)
         }).catch(e=>{
           reject(e)
         })
       })
-    })*/
+    })
     const p2 = this.sentenceArr.map((text,i)=>{
       return new Promise((resolve,reject)=>{
         this.sentenceType(text).then(obj=>{
@@ -178,33 +180,11 @@ class Cotoha{
         })
       })
     })
-    await Promise.all(p2)
+    await Promise.all(p1.concat(p2))
     return this.analysisArr
   }
-  makeOji () {
-    //data set
-    const typeToEmoji = {
-      "greeting":"&#128536;",
-      "information-providing":"&#x2757;&#x2757;",
-      "feedback":"&#128531;",
-      "information-seeking":"&#x1f914;",
-      "agreement":"&#x1f970;",
-      "feedbackElicitation":"&#x1f60f;",
-      "commissive":"&#x1f618;",
-      "acceptOffer":"&#x1f929;",
-      "selfCorrection":"&#x1f601;",
-      "thanking":"&#x1f618; &#128149;",
-      "apology":"&#x1f97a;",
-      "stalling":"&#x1f627;",
-      "directive":"&#x1f624;",
-      "goodbye":"&#x1f61a;",
-      "declineOffer":"&#x1f626;",
-      "turnAssign":"&#x1f604;",
-      "pausing":"&#x270b;",
-      "acceptApology":"&#x1f60d;",
-      "acceptThanking":"&#x1f970;"
-    }
-    const uniqueToEmoji = {
+  ShapedUniqueEmoji (sentence,uniqueArr) {
+    const emojiObj = {
       "Name": "チャン",
       "Name_Other": "クン",
       "Person": "",
@@ -247,20 +227,57 @@ class Cotoha{
       "Geological_Region": "",
       "Geological_Region_Other": "",
       "Mountain": "&#x26f0;",
-      "Island": "&#x1f3dd;"
+      "Island": "&#x1f3dd;"//2020/03/15 asd commit
     }
+    let shapedSentence = sentence
+    uniqueArr.forEach((obj) => {
+      const form = obj.form
+      const regex = new RegExp(form,'gu')
+      const extended_class = obj.extended_class
+      const emoji = emojiObj[extended_class] != null ? emojiObj[extended_class] : ""
+      shapedSentence = sentence.replace(regex,form+emoji)
+    });
+    return shapedSentence
+  }
+  makeOji () {
+    //data set
+    const typeToEmoji = {
+      "greeting":"&#128536;",
+      "information-providing":"&#x2757;&#x2757;",
+      "feedback":"&#128531;",
+      "information-seeking":"&#x1f914;",
+      "agreement":"&#x1f970;",
+      "feedbackElicitation":"&#x1f60f;",
+      "commissive":"&#x1f618;",
+      "acceptOffer":"&#x1f929;",
+      "selfCorrection":"&#x1f601;",
+      "thanking":"&#x1f618; &#128149;",
+      "apology":"&#x1f97a;",
+      "stalling":"&#x1f627;",
+      "directive":"&#x1f624;",
+      "goodbye":"&#x1f61a;",
+      "declineOffer":"&#x1f626;",
+      "turnAssign":"&#x1f604;",
+      "pausing":"&#x270b;",
+      "acceptApology":"&#x1f60d;",
+      "acceptThanking":"&#x1f970;"
+    }
+
     let ojiSentence = ""
+    let sentence
     this.analysisArr.forEach((obj) => {
       const type = obj.sentenceType.dialog_act[0]
+      const uniqueArr = obj.unique
       const endEmoji = typeToEmoji[type]
-      let sentence = obj.sentence
+      sentence = obj.sentence
+      sentence = this.ShapedUniqueEmoji(sentence,uniqueArr)
       const endPoint = sentence.slice(-1)
-      //console.log(endPoint)
       if(endPoint == "," || endPoint == "、" || endPoint == "." || endPoint == "。"){
         sentence = sentence.slice(0,-1)
       }
       ojiSentence = ojiSentence + sentence + endEmoji
     });
+
     return ojiSentence
   }
 }
@@ -292,8 +309,8 @@ const test = async () => {
   const request = {
     body: {
       functionToken: "jv8rmvf8kd0c3j",
-      access_token: "DkJcfx4QCpej3PiGNBDxoLzGf1ec",
-      message: "今日の僕のランチはハンバーグだったよ、直美ちゃんはどんなランチだった？"
+      access_token: "doq4ggfJljLPrC1uKnFhkXc80zTx",
+      message: "マイクロソフト者は今日もかっこいい"
     }
   }
   const res = ojisanCompiler(request)
