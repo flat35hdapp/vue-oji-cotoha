@@ -1,74 +1,95 @@
 <template>
   <v-app light>
-    <v-container>
-      <v-row>
-        <v-col xs="12" sm="12">
-          <v-card>
-            <v-card-title>1, COTOHA APIに登録する</v-card-title>
-            <v-card-text>
-              <p><a href="https://api.ce-cotoha.com/contents/developers/index.html">for Developers 無料登録</a>からサインアップしてください。</p>
-              <p>
-                ユーザー登録を済ませるとログイン画面が表示されるので、ログインして次のステップに移ってください。
-              </p>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col xs="12" sm="12">
-          <div class="">
+    <v-content>
+      <v-container>
+        <v-row>
+          <v-col xs="12" sm="12">
             <v-card>
-              <v-card-title>2, Access tokenを取得する</v-card-title>
+              <v-card-title>0, 利用にあたって</v-card-title>
               <v-card-text>
-                Client IDとClient secretをそれぞれ入力し、「Access tokenを取得」を押してください。
-                <v-text-field v-model="clientId" label="Client ID" :rules="clientIdInput" hide-details="auto"></v-text-field>
-                <v-text-field v-model="clientSecret" label="Client secret" :rules="clientSecretInput" hide-details="auto"></v-text-field>
-                <v-btn @click="getToken()" color="primary" :disabled="accessTokenBtn">Access tokenを取得</v-btn>
-                <v-progress-circular indeterminate="false" v-if="progressOfgetToken" color="primary"></v-progress-circular>{{tokenErrMsg}}{{tokenGetMsg}}
-              </v-card-text>
-              <v-card-subtitle>logic</v-card-subtitle>
-              <v-card-text>COTOHA APIを利用するにはClient IDとClient secretを用いてAccess Tokenを取得する必要があります。このセクションでは入力されたClient IDとClient secretからAccess Tokenを自動で取得しています。この部分の詳細は公式ページをご覧ください。</v-card-text>
-            </v-card>
-          </div>
-        </v-col>
-        <v-col xs="12" sm="12">
-          <div class="">
-            <v-card>
-              <v-card-title>3, おじさん構文にしたい文章を入力する。</v-card-title>
-              <v-card-text>
-                おじさん構文にしたい普通の文章を入力してください。このとき、「ですます調」で入力してください。「崩した文章」だと正常に動作しません。
-                <v-text-field v-model="inputMsg" label="普通の文"></v-text-field>
-                <v-btn @click="compiler()" color="primary">おじさん構文化</v-btn>
-                <v-progress-circular indeterminate="false" v-if="progressOfgetOji" color="primary"></v-progress-circular>
+                <p>本サービスでは利用者ご自身のCOTOHA APIの利用枠（1000回/日）でおじさん構文化しています。１文あたり4回ほど消費します。</p>
+                <p>また、COTOHA APIではClient IDとClient secretを再発行することができますので、セキュリティの観点から本サービス利用後はそれらを再発行していただくようお願いいたたします</p>
+                <p>実装している内容についてはQiita記事をご覧ください。</p>
               </v-card-text>
             </v-card>
-          </div>
-        </v-col>
-        <v-col xs="12" sm="12">
-          <div class="">
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col xs="12" sm="12">
             <v-card>
-              <v-card-title>4, 出力結果</v-card-title>
+              <v-card-title>1, COTOHA APIに登録する</v-card-title>
               <v-card-text>
-                <v-text-field v-html="outputMsg" readonly :value="outputMsg"></v-text-field>
-                <!--<v-btn color="primary" :disable="tweetBtn" @click="writeToClipboard()">コピーしてつぶやく</v-btn>-->
+                <p><a href="https://api.ce-cotoha.com/contents/developers/index.html">for Developers 無料登録</a>からサインアップしてください。</p>
+                <p>
+                  ユーザー登録を済ませるとログイン画面が表示されるので、ログインして次のステップに移ってください。
+                </p>
               </v-card-text>
             </v-card>
-          </div>
-
-        </v-col>
-        <v-col xs="12" sm="12">
-          <div class="">
-            <v-card>
-              <v-card-title>Logger</v-card-title>
-              <v-card-text>
-                {{logMsg}}
-              </v-card-text>
-            </v-card>
-          </div>
-
-        </v-col>
-      </v-row>
-    </v-container>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col xs="12" sm="12">
+            <div class="">
+              <v-card>
+                <v-card-title>2, Access tokenを取得する</v-card-title>
+                <v-card-text>
+                  Client IDとClient secretをそれぞれ入力し、「Access tokenを取得」を押してください。
+                  <v-text-field v-model="clientId" label="Client ID" :rules="clientIdInput" hide-details="auto"></v-text-field>
+                  <v-text-field v-model="clientSecret" label="Client secret" :rules="clientSecretInput" hide-details="auto"></v-text-field>
+                  <v-btn @click="getToken()" color="primary" :disabled="accessTokenBtn">Access tokenを取得</v-btn>
+                  <v-progress-circular indeterminate="false" v-if="progressOfgetToken" color="primary"></v-progress-circular>{{tokenErrMsg}}{{tokenGetMsg}}
+                </v-card-text>
+                <v-card-subtitle>logic</v-card-subtitle>
+                <v-card-text>COTOHA APIを利用するにはClient IDとClient secretを用いてAccess Tokenを取得する必要があります。このセクションでは入力されたClient IDとClient secretからAccess Tokenを自動で取得しています。この部分の詳細は公式ページをご覧ください。</v-card-text>
+              </v-card>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col xs="12" sm="12">
+            <div class="">
+              <v-card>
+                <v-card-title>3, おじさん構文にしたい文章を入力する。</v-card-title>
+                <v-card-text>
+                  おじさん構文にしたい普通の文章を入力してください。このとき、「ですます調」で入力してください。「崩した文章」だと正常に動作しません。
+                  <v-text-field v-model="inputMsg" label="普通の文"></v-text-field>
+                  <v-btn @click="compiler()" color="primary">おじさん構文化</v-btn>
+                  <v-progress-circular indeterminate="false" v-if="progressOfgetOji" color="primary"></v-progress-circular>
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col xs="12" sm="12">
+            <div class="">
+              <v-card>
+                <v-card-title>4, 出力結果</v-card-title>
+                <v-card-text>
+                  変換には10秒程度かかりますが、長すぎる場合はエラーになっていることもあるので再押下したりリロードしたりしてください。
+                  <v-text-field v-html="outputMsg" readonly :value="outputMsg"></v-text-field>
+                  <!--<v-btn color="primary" :disable="tweetBtn" @click="writeToClipboard()">コピーしてつぶやく</v-btn>-->
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col xs="12" sm="12">
+            <div class="">
+              <v-card>
+                <v-card-title>Logger</v-card-title>
+                <v-card-text>
+                  {{logMsg}}
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-content>
+    <v-footer><v-card-text class="text-center">&copy; flat35hd99</v-card-text></v-footer>
   </v-app>
-
 
 </template>
 
