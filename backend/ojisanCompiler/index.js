@@ -379,7 +379,7 @@ const test = async () => {
   const request = {
     body: {
       functionToken: "jv8rmvf8kd0c3j",
-      access_token: "doq4ggfJljLPrC1uKnFhkXc80zTx",
+      access_token: "****************************",
       message: "マイクロソフト者は今日もかっこいい"
     }
   }
