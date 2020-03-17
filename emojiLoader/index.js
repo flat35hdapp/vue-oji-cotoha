@@ -2,7 +2,7 @@
 const fs = require('fs');
 const csvSync = require('csv-parse/lib/sync');
 const main = () => {
-  const file = 'emoji.csv';
+  const file = 'emoji2.csv';
   let data = fs.readFileSync(file);
   let res = csvSync(data);
   const obj = {}
@@ -13,7 +13,7 @@ const main = () => {
     obj[key] = value
   });
   console.log(obj)
-  fs.writeFile('emoji.json', JSON.stringify(obj, null, '    '),()=>{
+  fs.writeFile('emoji2.json', JSON.stringify(obj, null, '    '),()=>{
     console.log("fs end")
   });
 };
